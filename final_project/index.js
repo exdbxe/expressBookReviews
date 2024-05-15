@@ -12,6 +12,21 @@ app.use("/customer",session({secret:"fingerprint_customer",resave: true, saveUni
 
 app.use("/customer/auth/*", function auth(req,res,next){
 //Write the authenication mechanism here
+    if(req.session.authorization) { //Get authorization from object store in session
+        token = req.session.authorization['accessToken']; //The token retrieve from authorization object
+        jwt.verify(token, "samsites",(err,user)=>{ //Verify token using JWT
+            if(!err){
+                req.user = user;
+                next();
+            }
+            else{
+                return res.status(403).json({message: "User not authenticated"})
+            }
+        });
+    }
+    else{
+        return res.status(403).json({message: "User not logged in"})
+    }
 });
  
 const PORT =5000;
